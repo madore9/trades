@@ -1,0 +1,201 @@
+<html>
+<head>
+<title>main.py</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+.s0 { color: #a9b7c6;}
+.s1 { color: #cc7832;}
+.s2 { color: #808080;}
+.s3 { color: #6a8759;}
+.s4 { color: #6897bb;}
+</style>
+</head>
+<body bgcolor="#2b2b2b">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060" >
+<tr><td><center>
+<font face="Arial, Helvetica" color="#000000">
+main.py</font>
+</center></td></tr></table>
+<pre>
+<span class="s1">from </span><span class="s0">datetime </span><span class="s1">import </span><span class="s0">datetime</span><span class="s1">, </span><span class="s0">timedelta</span>
+<span class="s1">import </span><span class="s0">matplotlib.pyplot </span><span class="s1">as </span><span class="s0">plt</span>
+<span class="s1">import </span><span class="s0">pandas </span><span class="s1">as </span><span class="s0">pd</span>
+
+
+<span class="s2">#if message.content.startswith(&quot;!sweepsbysize&quot;):</span>
+
+<span class="s2">#tickerSplit = message.content.split(&quot; &quot;)</span>
+
+<span class="s0">ticker = </span><span class="s3">'es'</span>
+<span class="s2">#delete = message.content</span>
+<span class="s1">if </span><span class="s0">ticker == </span><span class="s3">&quot;es&quot;</span><span class="s0">:</span>
+    <span class="s0">df = pd.read_csv(</span><span class="s3">&quot;ESTrades.txt&quot;</span><span class="s0">)</span>
+<span class="s1">if </span><span class="s0">ticker == </span><span class="s3">&quot;nq&quot;</span><span class="s0">:</span>
+    <span class="s0">df = pd.read_csv(</span><span class="s3">&quot;NQTrades.txt&quot;</span><span class="s0">)</span>
+<span class="s1">if </span><span class="s0">ticker == </span><span class="s3">&quot;rty&quot;</span><span class="s0">:</span>
+    <span class="s0">df = pd.read_csv(</span><span class="s3">&quot;RTYTrades.txt&quot;</span><span class="s0">)</span>
+<span class="s1">if </span><span class="s0">ticker == </span><span class="s3">&quot;cl&quot;</span><span class="s0">:</span>
+    <span class="s0">df = pd.read_csv(</span><span class="s3">&quot;CLTrades.txt&quot;</span><span class="s0">)</span>
+<span class="s2">#loading = await message.channel.send('LOADING ' + ticker + &quot; sweeps filtered by size ...&quot;)</span>
+
+<span class="s0">df.columns = df.columns.str.replace(</span><span class="s3">&quot;Date&quot;</span><span class="s1">, </span><span class="s3">&quot;Date&quot;</span><span class="s0">)</span>
+<span class="s0">df.columns = df.columns.str.replace(</span><span class="s3">&quot; Time&quot;</span><span class="s1">, </span><span class="s3">&quot;Time&quot;</span><span class="s0">)</span>
+<span class="s0">df.columns = df.columns.str.replace(</span><span class="s3">&quot; Ask Volume&quot;</span><span class="s1">, </span><span class="s3">&quot;AskVolume&quot;</span><span class="s0">)</span>
+<span class="s0">df.columns = df.columns.str.replace(</span><span class="s3">&quot; Bid Volume&quot;</span><span class="s1">, </span><span class="s3">&quot;BidVolume&quot;</span><span class="s0">)</span>
+<span class="s0">df.columns = df.columns.str.replace(</span><span class="s3">&quot; Volume&quot;</span><span class="s1">, </span><span class="s3">&quot;Volume&quot;</span><span class="s0">)</span>
+<span class="s0">df.columns = df.columns.str.replace(</span><span class="s3">&quot; Last&quot;</span><span class="s1">, </span><span class="s3">&quot;Price&quot;</span><span class="s0">)</span>
+<span class="s0">df[</span><span class="s3">'Time'</span><span class="s0">] = df[</span><span class="s3">'Time'</span><span class="s0">].str[:-</span><span class="s4">4</span><span class="s0">]</span>
+
+<span class="s1">del </span><span class="s0">df[</span><span class="s3">' Open'</span><span class="s0">]</span>
+<span class="s1">del </span><span class="s0">df[</span><span class="s3">' High'</span><span class="s0">]</span>
+<span class="s1">del </span><span class="s0">df[</span><span class="s3">' Low'</span><span class="s0">]</span>
+<span class="s1">del </span><span class="s0">df[</span><span class="s3">' OHLC Avg'</span><span class="s0">]</span>
+<span class="s1">del </span><span class="s0">df[</span><span class="s3">' HLC Avg'</span><span class="s0">]</span>
+<span class="s1">del </span><span class="s0">df[</span><span class="s3">' HL Avg'</span><span class="s0">]</span>
+<span class="s1">del </span><span class="s0">df[</span><span class="s3">' # of Trades'</span><span class="s0">]</span>
+<span class="s0">df = df.sort_values(by=[</span><span class="s3">'Date'</span><span class="s1">, </span><span class="s3">'Volume'</span><span class="s0">]</span><span class="s1">, </span><span class="s0">ascending=</span><span class="s1">False</span><span class="s0">)</span>
+<span class="s1">del </span><span class="s0">df[</span><span class="s3">'Volume'</span><span class="s0">]</span>
+<span class="s2">#del df['Date']</span>
+
+
+
+<span class="s0">BidVolume_unfiltered = []</span>
+<span class="s0">AskVolume_unfiltered = []</span>
+<span class="s0">Price = []</span>
+<span class="s0">Time = []</span>
+<span class="s0">Date = []</span>
+
+<span class="s2">############################################################################################</span>
+<span class="s1">for </span><span class="s0">bid </span><span class="s1">in </span><span class="s0">df.BidVolume:</span>
+    <span class="s0">BidVolume_unfiltered.append(bid)</span>
+<span class="s1">for </span><span class="s0">ask </span><span class="s1">in </span><span class="s0">df.AskVolume:</span>
+    <span class="s0">AskVolume_unfiltered.append(ask)</span>
+<span class="s1">for </span><span class="s0">price </span><span class="s1">in </span><span class="s0">df.Price:</span>
+    <span class="s0">Price.append(price)</span>
+<span class="s1">for </span><span class="s0">t </span><span class="s1">in </span><span class="s0">df.Time:</span>
+    <span class="s0">Time.append(t)</span>
+<span class="s1">for </span><span class="s0">d </span><span class="s1">in </span><span class="s0">df.Date:</span>
+    <span class="s0">Date.append(d)</span>
+
+<span class="s2">#print(df)</span>
+
+
+<span class="s0">bid_zip = zip(BidVolume_unfiltered</span><span class="s1">, </span><span class="s0">Price</span><span class="s1">, </span><span class="s0">Time</span><span class="s1">, </span><span class="s0">Date)</span>
+<span class="s0">BidVolume = []</span>
+<span class="s0">BidPrice = []</span>
+<span class="s0">BidTime = []</span>
+<span class="s0">BidDate = []</span>
+
+<span class="s1">for </span><span class="s0">BidVolume_i</span><span class="s1">, </span><span class="s0">Price_i</span><span class="s1">, </span><span class="s0">Time_i</span><span class="s1">, </span><span class="s0">Date_i </span><span class="s1">in </span><span class="s0">bid_zip:</span>
+    <span class="s1">if </span><span class="s0">BidVolume_i &gt; </span><span class="s4">0</span><span class="s0">:</span>
+        <span class="s0">BidVolume.append(BidVolume_i)</span>
+        <span class="s0">BidPrice.append(Price_i)</span>
+        <span class="s0">BidTime.append(Time_i)</span>
+        <span class="s0">BidDate.append(Date_i)</span>
+
+<span class="s2">#print(bid_zip)</span>
+<span class="s0">SweepBid_dict = {}</span>
+
+<span class="s1">for </span><span class="s0">i </span><span class="s1">in </span><span class="s0">range(len(BidTime)):</span>
+    <span class="s0">time = BidTime[i]</span>
+    <span class="s1">if not </span><span class="s0">time </span><span class="s1">in </span><span class="s0">SweepBid_dict:</span>
+        <span class="s0">SweepBid_dict[time] = {}</span>
+
+        <span class="s0">SweepBid_dict[time][</span><span class="s3">'bid volume'</span><span class="s0">] = BidVolume[i]</span>
+        <span class="s0">SweepBid_dict[time][</span><span class="s3">'high'</span><span class="s0">] = BidPrice[i]</span>
+        <span class="s0">SweepBid_dict[time][</span><span class="s3">'low'</span><span class="s0">] = BidPrice[i]</span>
+
+    <span class="s1">else</span><span class="s0">:</span>
+        <span class="s0">SweepBid_dict[time][</span><span class="s3">'bid volume'</span><span class="s0">] += BidVolume[i]</span>
+        <span class="s1">if </span><span class="s0">BidPrice[i] &lt; SweepBid_dict[time][</span><span class="s3">'low'</span><span class="s0">]:</span>
+            <span class="s0">SweepBid_dict[time][</span><span class="s3">'low'</span><span class="s0">] = BidPrice[i]</span>
+        <span class="s1">if </span><span class="s0">BidPrice[i] &gt; SweepBid_dict[time][</span><span class="s3">'high'</span><span class="s0">]:</span>
+            <span class="s0">SweepBid_dict[time][</span><span class="s3">'high'</span><span class="s0">] = BidPrice[i]</span>
+
+<span class="s0">df = pd.DataFrame.from_dict(SweepBid_dict</span><span class="s1">, </span><span class="s0">orient=</span><span class="s3">'index'</span><span class="s0">)</span>
+<span class="s0">df.index.name = </span><span class="s3">'time'</span>
+<span class="s0">df = df.sort_values(by=[</span><span class="s3">'bid volume'</span><span class="s0">]</span><span class="s1">, </span><span class="s0">ascending=</span><span class="s1">False</span><span class="s0">)</span>
+<span class="s0">points = df[</span><span class="s3">&quot;high&quot;</span><span class="s0">] - df[</span><span class="s3">&quot;low&quot;</span><span class="s0">]</span>
+<span class="s0">df[</span><span class="s3">&quot;points&quot;</span><span class="s0">] = points</span>
+<span class="s0">df[</span><span class="s3">&quot;points per contract&quot;</span><span class="s0">] = df[</span><span class="s3">&quot;points&quot;</span><span class="s0">] / df[</span><span class="s3">'bid volume'</span><span class="s0">]</span>
+
+<span class="s0">df.reset_index(inplace=</span><span class="s1">True</span><span class="s0">)</span>
+<span class="s0">df = df.head(</span><span class="s4">25</span><span class="s0">)</span>
+<span class="s0">df = df.round(</span><span class="s4">4</span><span class="s0">)</span>
+<span class="s0">print(df)</span>
+<span class="s2">############################################################################################</span>
+
+<span class="s0">Ask_zip = zip(AskVolume_unfiltered</span><span class="s1">, </span><span class="s0">Price</span><span class="s1">, </span><span class="s0">Time)</span>
+<span class="s0">AskVolume = []</span>
+<span class="s0">AskPrice = []</span>
+<span class="s0">AskTime = []</span>
+
+<span class="s1">for </span><span class="s0">AskVolume_i</span><span class="s1">, </span><span class="s0">Price_i</span><span class="s1">, </span><span class="s0">Time_i </span><span class="s1">in </span><span class="s0">Ask_zip:</span>
+    <span class="s1">if </span><span class="s0">AskVolume_i &gt; </span><span class="s4">0</span><span class="s0">:</span>
+        <span class="s0">AskVolume.append(AskVolume_i)</span>
+        <span class="s0">AskPrice.append(Price_i)</span>
+        <span class="s0">AskTime.append(Time_i)</span>
+
+<span class="s0">SweepAsk_dict = {}</span>
+
+<span class="s1">if </span><span class="s0">len(AskTime) &gt; </span><span class="s4">0</span><span class="s0">:</span>
+    <span class="s1">for </span><span class="s0">i </span><span class="s1">in </span><span class="s0">range(len(AskTime)):</span>
+        <span class="s0">time = AskTime[i]</span>
+        <span class="s1">if not </span><span class="s0">time </span><span class="s1">in </span><span class="s0">SweepAsk_dict:</span>
+            <span class="s0">SweepAsk_dict[time] = {}</span>
+
+            <span class="s0">SweepAsk_dict[time][</span><span class="s3">'ask volume'</span><span class="s0">] = AskVolume[i]</span>
+            <span class="s0">SweepAsk_dict[time][</span><span class="s3">' high'</span><span class="s0">] = AskPrice[i]</span>
+            <span class="s0">SweepAsk_dict[time][</span><span class="s3">' low'</span><span class="s0">] = AskPrice[i]</span>
+
+        <span class="s1">else</span><span class="s0">:</span>
+            <span class="s0">SweepAsk_dict[time][</span><span class="s3">'ask volume'</span><span class="s0">] += AskVolume[i]</span>
+            <span class="s1">if </span><span class="s0">AskPrice[i] &lt; SweepAsk_dict[time][</span><span class="s3">' low'</span><span class="s0">]:</span>
+                <span class="s0">SweepAsk_dict[time][</span><span class="s3">' low'</span><span class="s0">] = AskPrice[i]</span>
+            <span class="s1">if </span><span class="s0">AskPrice[i] &gt; SweepAsk_dict[time][</span><span class="s3">' high'</span><span class="s0">]:</span>
+                <span class="s0">SweepAsk_dict[time][</span><span class="s3">' high'</span><span class="s0">] = AskPrice[i]</span>
+
+    <span class="s0">df2 = pd.DataFrame.from_dict(SweepAsk_dict</span><span class="s1">, </span><span class="s0">orient=</span><span class="s3">'index'</span><span class="s0">)</span>
+    <span class="s0">df2.index.name = </span><span class="s3">' time'</span>
+    <span class="s0">df2 = df2.sort_values(by=[</span><span class="s3">'ask volume'</span><span class="s0">]</span><span class="s1">, </span><span class="s0">ascending=</span><span class="s1">False</span><span class="s0">)</span>
+    <span class="s0">points = df2[</span><span class="s3">&quot; high&quot;</span><span class="s0">] - df2[</span><span class="s3">&quot; low&quot;</span><span class="s0">]</span>
+    <span class="s0">df2[</span><span class="s3">&quot; points&quot;</span><span class="s0">] = points</span>
+    <span class="s0">df2[</span><span class="s3">&quot; points per contract&quot;</span><span class="s0">] = df2[</span><span class="s3">&quot; points&quot;</span><span class="s0">] / df2[</span><span class="s3">'ask volume'</span><span class="s0">]</span>
+    <span class="s0">df2.reset_index(inplace=</span><span class="s1">True</span><span class="s0">)</span>
+    <span class="s0">df2 = df2.head(</span><span class="s4">25</span><span class="s0">)</span>
+    <span class="s0">df2 = df2.round(</span><span class="s4">4</span><span class="s0">)</span>
+    <span class="s0">print(df2)</span>
+    <span class="s0">df = pd.concat([df</span><span class="s1">, </span><span class="s0">df2]</span><span class="s1">, </span><span class="s0">axis=</span><span class="s4">1</span><span class="s0">)</span>
+
+<span class="s2">############################################################################################</span>
+
+
+<span class="s0">fig</span><span class="s1">, </span><span class="s0">ax = plt.subplots(figsize=(</span><span class="s4">20</span><span class="s1">, </span><span class="s4">12</span><span class="s0">))</span>
+<span class="s2"># hide axes</span>
+<span class="s0">fig.patch.set_visible(</span><span class="s1">False</span><span class="s0">)</span>
+<span class="s0">ax.axis(</span><span class="s3">'off'</span><span class="s0">)</span>
+<span class="s0">ax.axis(</span><span class="s3">'tight'</span><span class="s0">)</span>
+<span class="s0">ax.grid(</span><span class="s1">False</span><span class="s0">)</span>
+<span class="s0">colors = []</span>
+<span class="s1">for </span><span class="s0">_</span><span class="s1">, </span><span class="s0">row </span><span class="s1">in </span><span class="s0">df.iterrows():</span>
+    <span class="s0">colors_in_column = [</span><span class="s3">&quot;xkcd:sky blue&quot;</span><span class="s1">, </span><span class="s3">&quot;xkcd:pinkish&quot;</span><span class="s1">, </span><span class="s3">&quot;xkcd:sky blue&quot;</span><span class="s1">, </span><span class="s3">&quot;xkcd:sky blue&quot;</span><span class="s1">, </span><span class="s3">&quot;xkcd:sky blue&quot;</span><span class="s1">,</span>
+                        <span class="s3">&quot;xkcd:sky blue&quot;</span><span class="s1">, </span><span class="s3">&quot;xkcd:sky blue&quot;</span><span class="s1">, </span><span class="s3">&quot;xkcd:seafoam green&quot;</span><span class="s1">, </span><span class="s3">&quot;xkcd:sky blue&quot;</span><span class="s1">, </span><span class="s3">&quot;xkcd:sky blue&quot;</span><span class="s1">,</span>
+                        <span class="s3">&quot;xkcd:sky blue&quot;</span><span class="s1">, </span><span class="s3">&quot;xkcd:sky blue&quot;</span><span class="s0">]</span>
+    <span class="s2"># if row[&quot;AskVolume&quot;]&gt;0:</span>
+    <span class="s2">#     colors_in_column[3] = &quot;xkcd:green&quot;</span>
+    <span class="s2"># if row[&quot;BidVolume&quot;]&gt;0:</span>
+    <span class="s2">#    colors_in_column[2] = &quot;xkcd:red&quot;</span>
+    <span class="s0">colors.append(colors_in_column)</span>
+<span class="s0">tab = ax.table(cellText=df.values</span><span class="s1">, </span><span class="s0">colLabels=df.columns</span><span class="s1">, </span><span class="s0">loc=</span><span class="s3">'center'</span><span class="s1">, </span><span class="s0">cellColours=colors)</span>
+<span class="s0">tab.auto_set_font_size(</span><span class="s1">False</span><span class="s0">)</span>
+<span class="s0">tab.set_fontsize(</span><span class="s4">14</span><span class="s0">)</span>
+<span class="s0">tab.scale(</span><span class="s4">1</span><span class="s1">, </span><span class="s4">2</span><span class="s0">)</span>
+<span class="s0">fig.tight_layout()</span>
+
+<span class="s0">stamp = datetime.now()</span>
+<span class="s0">fig.suptitle(</span><span class="s3">&quot;  /&quot; </span><span class="s0">+ ticker + </span><span class="s3">&quot; Large Trade Sweeps&quot; </span><span class="s0">+ </span><span class="s3">&quot;(&quot; </span><span class="s0">+ str(stamp) + </span><span class="s3">&quot;)&quot;</span><span class="s1">, </span><span class="s0">fontsize=</span><span class="s4">14</span><span class="s1">, </span><span class="s0">fontweight=</span><span class="s3">'bold'</span><span class="s0">)</span>
+<span class="s0">fig.savefig(</span><span class="s3">f'gigasweeps</span><span class="s1">{</span><span class="s0">Date</span><span class="s1">}</span><span class="s3">.png'</span><span class="s1">, </span><span class="s0">bbox_inches=</span><span class="s3">'tight'</span><span class="s1">, </span><span class="s0">pad_inches=</span><span class="s4">0</span><span class="s0">)</span>
+<span class="s2">#await loading.delete()</span>
+<span class="s2">#await message.channel.send('Bid/Ask Sweeps Trades for ' + ticker, file=discord.File(&quot;gigasweeps.png&quot;))</span></pre>
+</body>
+</html>

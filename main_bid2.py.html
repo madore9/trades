@@ -1,0 +1,244 @@
+<html>
+<head>
+<title>main_bid2.py</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+.s0 { color: #cc7832;}
+.s1 { color: #a9b7c6;}
+.s2 { color: #6a8759;}
+.s3 { color: #6897bb;}
+.s4 { color: #808080;}
+</style>
+</head>
+<body bgcolor="#2b2b2b">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060" >
+<tr><td><center>
+<font face="Arial, Helvetica" color="#000000">
+main_bid2.py</font>
+</center></td></tr></table>
+<pre><span class="s0">import </span><span class="s1">os</span>
+<span class="s0">import </span><span class="s1">pandas</span>
+<span class="s0">import </span><span class="s1">pandas </span><span class="s0">as </span><span class="s1">pd</span>
+
+<span class="s1">ticker = </span><span class="s2">'es'</span>
+<span class="s0">if </span><span class="s1">ticker == </span><span class="s2">&quot;es&quot;</span><span class="s1">:</span>
+    <span class="s1">df = pd.read_csv(</span><span class="s2">&quot;ESTrades2.txt&quot;</span><span class="s1">)</span>
+<span class="s0">if </span><span class="s1">ticker == </span><span class="s2">&quot;nq&quot;</span><span class="s1">:</span>
+    <span class="s1">df = pd.read_csv(</span><span class="s2">&quot;NQTrades.txt&quot;</span><span class="s1">)</span>
+<span class="s0">if </span><span class="s1">ticker == </span><span class="s2">&quot;rty&quot;</span><span class="s1">:</span>
+    <span class="s1">df = pd.read_csv(</span><span class="s2">&quot;RTYTrades.txt&quot;</span><span class="s1">)</span>
+<span class="s0">if </span><span class="s1">ticker == </span><span class="s2">&quot;cl&quot;</span><span class="s1">:</span>
+    <span class="s1">df = pd.read_csv(</span><span class="s2">&quot;CLTrades.txt&quot;</span><span class="s1">)</span>
+
+<span class="s1">final_bid = pd.DataFrame()</span>
+<span class="s1">final_ask = pd.DataFrame()</span>
+<span class="s1">final_df = pd.DataFrame()</span>
+
+<span class="s1">df.columns = df.columns.str.replace(</span><span class="s2">&quot;Date&quot;</span><span class="s0">, </span><span class="s2">&quot;Date&quot;</span><span class="s1">)</span>
+<span class="s1">df.columns = df.columns.str.replace(</span><span class="s2">&quot; Time&quot;</span><span class="s0">, </span><span class="s2">&quot;Time&quot;</span><span class="s1">)</span>
+<span class="s1">df.columns = df.columns.str.replace(</span><span class="s2">&quot; Ask Volume&quot;</span><span class="s0">, </span><span class="s2">&quot;AskVolume&quot;</span><span class="s1">)</span>
+<span class="s1">df.columns = df.columns.str.replace(</span><span class="s2">&quot; Bid Volume&quot;</span><span class="s0">, </span><span class="s2">&quot;BidVolume&quot;</span><span class="s1">)</span>
+<span class="s1">df.columns = df.columns.str.replace(</span><span class="s2">&quot; Volume&quot;</span><span class="s0">, </span><span class="s2">&quot;Volume&quot;</span><span class="s1">)</span>
+<span class="s1">df.columns = df.columns.str.replace(</span><span class="s2">&quot; Last&quot;</span><span class="s0">, </span><span class="s2">&quot;Price&quot;</span><span class="s1">)</span>
+<span class="s1">df[</span><span class="s2">'Time'</span><span class="s1">] = df[</span><span class="s2">'Time'</span><span class="s1">].str[:-</span><span class="s3">4</span><span class="s1">]</span>
+<span class="s1">df = df.sort_values(by=[</span><span class="s2">'Date'</span><span class="s1">]</span><span class="s0">, </span><span class="s1">ascending=</span><span class="s0">False</span><span class="s1">)</span>
+<span class="s4">#delete orders at close</span>
+<span class="s1">df = df[df.Time.str[:</span><span class="s3">6</span><span class="s1">] != </span><span class="s2">'15:59'</span><span class="s1">]</span>
+<span class="s1">df = df[df.Time != </span><span class="s2">'15:59:33.02'</span><span class="s1">]</span>
+<span class="s1">print(df.Time.str[:</span><span class="s3">6</span><span class="s1">])</span>
+<span class="s4">## example df.drop(df.loc[df['line_race']==0].index, inplace=True)</span>
+
+<span class="s1">unique_dates = df[</span><span class="s2">'Date'</span><span class="s1">].unique()</span>
+
+<span class="s1">print(</span><span class="s2">&quot;original data frame: &quot;</span><span class="s0">,</span><span class="s1">df)</span>
+
+<span class="s0">for </span><span class="s1">d </span><span class="s0">in </span><span class="s1">unique_dates:</span>
+    <span class="s1">date_df = []</span>
+    <span class="s1">ask_df = pd.DataFrame()</span>
+    <span class="s1">date_df = df[df[</span><span class="s2">'Date'</span><span class="s1">] == d]</span>
+    <span class="s0">del </span><span class="s1">date_df[</span><span class="s2">' Open'</span><span class="s1">]</span>
+    <span class="s0">del </span><span class="s1">date_df[</span><span class="s2">' High'</span><span class="s1">]</span>
+    <span class="s0">del </span><span class="s1">date_df[</span><span class="s2">' Low'</span><span class="s1">]</span>
+    <span class="s0">del </span><span class="s1">date_df[</span><span class="s2">' OHLC Avg'</span><span class="s1">]</span>
+    <span class="s0">del </span><span class="s1">date_df[</span><span class="s2">' HLC Avg'</span><span class="s1">]</span>
+    <span class="s0">del </span><span class="s1">date_df[</span><span class="s2">' HL Avg'</span><span class="s1">]</span>
+    <span class="s0">del </span><span class="s1">date_df[</span><span class="s2">' # of Trades'</span><span class="s1">]</span>
+    <span class="s1">date_df = date_df.sort_values(by=[</span><span class="s2">'Volume'</span><span class="s1">]</span><span class="s0">, </span><span class="s1">ascending=</span><span class="s0">False</span><span class="s1">)</span>
+    <span class="s0">del </span><span class="s1">date_df[</span><span class="s2">'Volume'</span><span class="s1">]</span>
+
+    <span class="s1">BidVolume_unfiltered = []</span>
+    <span class="s1">AskVolume_unfiltered = []</span>
+    <span class="s1">Price = []</span>
+    <span class="s1">Time = []</span>
+    <span class="s1">Date = []</span>
+
+    <span class="s4">############################################################################################</span>
+    <span class="s0">for </span><span class="s1">bid </span><span class="s0">in </span><span class="s1">date_df.BidVolume:</span>
+        <span class="s1">BidVolume_unfiltered.append(bid)</span>
+    <span class="s0">for </span><span class="s1">ask </span><span class="s0">in </span><span class="s1">date_df.AskVolume:</span>
+        <span class="s1">AskVolume_unfiltered.append(ask)</span>
+    <span class="s0">for </span><span class="s1">price </span><span class="s0">in </span><span class="s1">date_df.Price:</span>
+        <span class="s1">Price.append(price)</span>
+    <span class="s0">for </span><span class="s1">t </span><span class="s0">in </span><span class="s1">date_df.Time:</span>
+        <span class="s1">Time.append(t)</span>
+    <span class="s0">for </span><span class="s1">d </span><span class="s0">in </span><span class="s1">date_df.Date:</span>
+        <span class="s1">Date.append(d)</span>
+    <span class="s4">#print(Price)</span>
+    <span class="s1">bid_zip = zip(BidVolume_unfiltered</span><span class="s0">, </span><span class="s1">Price</span><span class="s0">, </span><span class="s1">Time</span><span class="s0">, </span><span class="s1">Date)</span>
+    <span class="s1">BidVolume = []</span>
+    <span class="s1">BidPrice = []</span>
+    <span class="s1">BidTime = []</span>
+    <span class="s1">BidDate = []</span>
+    <span class="s0">for </span><span class="s1">BidVolume_i</span><span class="s0">, </span><span class="s1">Price_i</span><span class="s0">, </span><span class="s1">Time_i</span><span class="s0">, </span><span class="s1">Date_i </span><span class="s0">in </span><span class="s1">bid_zip:</span>
+        <span class="s0">if </span><span class="s1">BidVolume_i &gt; </span><span class="s3">0</span><span class="s1">:</span>
+            <span class="s1">BidVolume.append(BidVolume_i)</span>
+            <span class="s1">BidPrice.append(Price_i)</span>
+            <span class="s1">BidTime.append(Time_i)</span>
+            <span class="s1">BidDate.append(Date_i)</span>
+            <span class="s1">print(</span><span class="s2">&quot;BID&quot;</span><span class="s1">)</span>
+        <span class="s0">else</span><span class="s1">:</span>
+            <span class="s1">print(</span><span class="s2">&quot;NO BID&quot;</span><span class="s0">, </span><span class="s1">BidVolume_i</span><span class="s0">, </span><span class="s1">Price_i</span><span class="s0">, </span><span class="s1">Time_i</span><span class="s0">, </span><span class="s1">Date_i)</span>
+    <span class="s0">if </span><span class="s1">len(BidTime) &gt; </span><span class="s3">0</span><span class="s1">:</span>
+        <span class="s1">SweepBid_dict = {}</span>
+        <span class="s4">#if len(BidTime) &lt; 100000:</span>
+        <span class="s0">for </span><span class="s1">i </span><span class="s0">in </span><span class="s1">range(len(BidTime)):</span>
+            <span class="s1">time = BidTime[i]</span>
+            <span class="s4">#print(&quot;time: &quot;, time)</span>
+            <span class="s0">if not </span><span class="s1">time </span><span class="s0">in </span><span class="s1">SweepBid_dict:</span>
+                <span class="s1">SweepBid_dict[time] = {}</span>
+                <span class="s1">SweepBid_dict[time][</span><span class="s2">'date'</span><span class="s1">] = BidDate[i]</span>
+                <span class="s1">SweepBid_dict[time][</span><span class="s2">'bid volume'</span><span class="s1">] = BidVolume[i]</span>
+                <span class="s1">SweepBid_dict[time][</span><span class="s2">'high'</span><span class="s1">] = BidPrice[i]</span>
+                <span class="s1">SweepBid_dict[time][</span><span class="s2">'low'</span><span class="s1">] = BidPrice[i]</span>
+            <span class="s0">else</span><span class="s1">:</span>
+                <span class="s1">SweepBid_dict[time][</span><span class="s2">'bid volume'</span><span class="s1">] += BidVolume[i]</span>
+                <span class="s1">SweepBid_dict[time][</span><span class="s2">'date'</span><span class="s1">] = BidDate[i]</span>
+                <span class="s0">if </span><span class="s1">BidPrice[i] &lt; SweepBid_dict[time][</span><span class="s2">'low'</span><span class="s1">]:</span>
+                    <span class="s1">SweepBid_dict[time][</span><span class="s2">'low'</span><span class="s1">] = BidPrice[i]</span>
+                <span class="s0">if </span><span class="s1">BidPrice[i] &gt; SweepBid_dict[time][</span><span class="s2">'high'</span><span class="s1">]:</span>
+                    <span class="s1">SweepBid_dict[time][</span><span class="s2">'high'</span><span class="s1">] = BidPrice[i]</span>
+        <span class="s1">date_df = pd.DataFrame.from_dict(SweepBid_dict</span><span class="s0">, </span><span class="s1">orient=</span><span class="s2">'index'</span><span class="s1">)</span>
+        <span class="s1">date_df.index.name = </span><span class="s2">'time'</span>
+
+        <span class="s4">#date_df = date_df.sort_values(by=['bid volume'], ascending=False)</span>
+        <span class="s1">points = date_df[</span><span class="s2">&quot;high&quot;</span><span class="s1">] - date_df[</span><span class="s2">&quot;low&quot;</span><span class="s1">]</span>
+        <span class="s1">date_df[</span><span class="s2">&quot;points&quot;</span><span class="s1">] = points</span>
+        <span class="s1">date_df[</span><span class="s2">&quot;points per contract&quot;</span><span class="s1">] = date_df[</span><span class="s2">&quot;points&quot;</span><span class="s1">] / date_df[</span><span class="s2">'bid volume'</span><span class="s1">]</span>
+        <span class="s1">date_df.reset_index(inplace=</span><span class="s0">True</span><span class="s1">)</span>
+        <span class="s4">#date_df.set_index(['date','time'])</span>
+        <span class="s1">date_df = date_df[[</span><span class="s2">'date'</span><span class="s0">,</span><span class="s2">'time'</span><span class="s0">,</span><span class="s2">'bid volume'</span><span class="s0">, </span><span class="s2">'high'</span><span class="s0">, </span><span class="s2">'low'</span><span class="s0">, </span><span class="s2">'points'</span><span class="s0">, </span><span class="s2">'points per contract'</span><span class="s1">]]</span>
+        <span class="s1">date_df = date_df.head(</span><span class="s3">25</span><span class="s1">)</span>
+        <span class="s1">date_df = date_df.round(</span><span class="s3">4</span><span class="s1">)</span>
+        <span class="s1">date_df = pd.concat([date_df]</span><span class="s0">, </span><span class="s1">axis=</span><span class="s3">1</span><span class="s1">)</span>
+
+        <span class="s0">if </span><span class="s1">len(final_bid) == </span><span class="s3">0</span><span class="s1">:</span>
+            <span class="s1">final_bid = date_df</span>
+            <span class="s4">#print(&quot;if final_bid: &quot;, final_bid)</span>
+        <span class="s0">else</span><span class="s1">:</span>
+            <span class="s1">final_bid = pandas.concat([final_bid</span><span class="s0">, </span><span class="s1">date_df])</span>
+
+
+<span class="s4">###################### Ask #############</span>
+
+    <span class="s1">Ask_zip = zip(AskVolume_unfiltered</span><span class="s0">, </span><span class="s1">Price</span><span class="s0">, </span><span class="s1">Time</span><span class="s0">, </span><span class="s1">Date)</span>
+    <span class="s1">AskVolume = []</span>
+    <span class="s1">AskPrice = []</span>
+    <span class="s1">AskTime = []</span>
+    <span class="s1">AskDate = []</span>
+
+    <span class="s0">for </span><span class="s1">AskVolume_i</span><span class="s0">, </span><span class="s1">Price_i</span><span class="s0">, </span><span class="s1">Time_i</span><span class="s0">, </span><span class="s1">Date_i </span><span class="s0">in </span><span class="s1">Ask_zip:</span>
+        <span class="s0">if </span><span class="s1">AskVolume_i &gt; </span><span class="s3">0</span><span class="s1">:</span>
+            <span class="s1">AskVolume.append(AskVolume_i)</span>
+            <span class="s1">AskPrice.append(Price_i)</span>
+            <span class="s1">AskTime.append(Time_i)</span>
+            <span class="s1">AskDate.append(Date_i)</span>
+
+    <span class="s1">SweepAsk_dict = {}</span>
+
+    <span class="s0">if </span><span class="s1">len(AskTime) &gt; </span><span class="s3">0</span><span class="s1">:</span>
+        <span class="s0">for </span><span class="s1">i </span><span class="s0">in </span><span class="s1">range(len(AskTime)):</span>
+            <span class="s1">time = AskTime[i]</span>
+            <span class="s0">if not </span><span class="s1">time </span><span class="s0">in </span><span class="s1">SweepAsk_dict:</span>
+                <span class="s1">SweepAsk_dict[time] = {}</span>
+
+                <span class="s1">SweepAsk_dict[time][</span><span class="s2">'ask volume'</span><span class="s1">] = AskVolume[i]</span>
+                <span class="s1">SweepAsk_dict[time][</span><span class="s2">'high'</span><span class="s1">] = AskPrice[i]</span>
+                <span class="s1">SweepAsk_dict[time][</span><span class="s2">'low'</span><span class="s1">] = AskPrice[i]</span>
+                <span class="s1">SweepAsk_dict[time][</span><span class="s2">'date'</span><span class="s1">] = AskDate[i]</span>
+
+            <span class="s0">else</span><span class="s1">:</span>
+                <span class="s1">SweepAsk_dict[time][</span><span class="s2">'ask volume'</span><span class="s1">] += AskVolume[i]</span>
+                <span class="s1">SweepAsk_dict[time][</span><span class="s2">'date'</span><span class="s1">] = AskDate[i]</span>
+                <span class="s0">if </span><span class="s1">AskPrice[i] &lt; SweepAsk_dict[time][</span><span class="s2">'low'</span><span class="s1">]:</span>
+                    <span class="s1">SweepAsk_dict[time][</span><span class="s2">'low'</span><span class="s1">] = AskPrice[i]</span>
+                <span class="s0">if </span><span class="s1">AskPrice[i] &gt; SweepAsk_dict[time][</span><span class="s2">'high'</span><span class="s1">]:</span>
+                    <span class="s1">SweepAsk_dict[time][</span><span class="s2">'high'</span><span class="s1">] = AskPrice[i]</span>
+
+        <span class="s1">ask_df = pd.DataFrame.from_dict(SweepAsk_dict</span><span class="s0">, </span><span class="s1">orient=</span><span class="s2">'index'</span><span class="s1">)</span>
+        <span class="s1">ask_df.index.name = </span><span class="s2">'time'</span>
+        <span class="s1">ask_df = ask_df.sort_values(by=[</span><span class="s2">'ask volume'</span><span class="s1">]</span><span class="s0">, </span><span class="s1">ascending=</span><span class="s0">False</span><span class="s1">)</span>
+        <span class="s1">points = ask_df[</span><span class="s2">&quot;high&quot;</span><span class="s1">] - ask_df[</span><span class="s2">&quot;low&quot;</span><span class="s1">]</span>
+        <span class="s1">ask_df[</span><span class="s2">&quot;points&quot;</span><span class="s1">] = points</span>
+        <span class="s1">ask_df[</span><span class="s2">&quot;points per contract&quot;</span><span class="s1">] = ask_df[</span><span class="s2">&quot;points&quot;</span><span class="s1">] / ask_df[</span><span class="s2">'ask volume'</span><span class="s1">]</span>
+        <span class="s1">ask_df.reset_index(inplace=</span><span class="s0">True</span><span class="s1">)</span>
+        <span class="s4">#ask_df.set_index(['date', 'time'])</span>
+        <span class="s1">ask_df = ask_df[[</span><span class="s2">'date'</span><span class="s0">, </span><span class="s2">'time'</span><span class="s0">, </span><span class="s2">'ask volume'</span><span class="s0">, </span><span class="s2">'high'</span><span class="s0">, </span><span class="s2">'low'</span><span class="s0">, </span><span class="s2">'points'</span><span class="s0">, </span><span class="s2">'points per contract'</span><span class="s1">]]</span>
+        <span class="s1">ask_df = ask_df.head(</span><span class="s3">25</span><span class="s1">)</span>
+        <span class="s1">ask_df = ask_df.round(</span><span class="s3">4</span><span class="s1">)</span>
+        <span class="s0">if </span><span class="s1">len(final_ask) == </span><span class="s3">0</span><span class="s1">:</span>
+            <span class="s1">final_ask = ask_df</span>
+            <span class="s4">#print(&quot;if final_bid: &quot;, final_bid)</span>
+        <span class="s0">else</span><span class="s1">:</span>
+            <span class="s1">final_ask = pandas.concat([final_ask</span><span class="s0">, </span><span class="s1">ask_df])</span>
+            <span class="s4">#print(&quot;else final_bid: &quot;, final_bid)</span>
+
+<span class="s4">#################################### Export to Excel ######################################</span>
+
+<span class="s1">final_ask = final_ask.sort_values(by=[</span><span class="s2">'ask volume'</span><span class="s1">]</span><span class="s0">, </span><span class="s1">ascending=</span><span class="s0">False</span><span class="s1">)</span>
+<span class="s1">final_ask = final_ask.reset_index(drop=</span><span class="s0">True</span><span class="s1">)</span>
+
+<span class="s1">final_bid = final_bid.sort_values(by=[</span><span class="s2">'bid volume'</span><span class="s1">]</span><span class="s0">, </span><span class="s1">ascending=</span><span class="s0">False</span><span class="s1">)</span>
+<span class="s1">final_bid = final_bid.reset_index(drop=</span><span class="s0">True</span><span class="s1">)</span>
+
+<span class="s1">print(final_ask)</span>
+<span class="s1">print(final_bid)</span>
+
+<span class="s1">final_df = pd.concat([final_bid</span><span class="s0">, </span><span class="s1">final_ask]</span><span class="s0">, </span><span class="s1">axis=</span><span class="s3">1</span><span class="s1">)</span>
+
+<span class="s1">print(</span><span class="s2">&quot;final df: &quot;</span><span class="s0">,</span><span class="s1">final_df)</span>
+<span class="s1">num_of_dates = len(unique_dates)</span>
+<span class="s1">print(num_of_dates)</span>
+
+<span class="s0">if </span><span class="s1">num_of_dates &gt; </span><span class="s3">1</span><span class="s1">:</span>
+    <span class="s1">end_date = unique_dates[num_of_dates-</span><span class="s3">1</span><span class="s1">]</span>
+    <span class="s1">print(end_date)</span>
+    <span class="s1">begin_date = unique_dates[</span><span class="s3">0</span><span class="s1">]</span>
+    <span class="s1">date_range = end_date + </span><span class="s2">&quot;.&quot; </span><span class="s1">+ begin_date</span>
+    <span class="s1">print(date_range)</span>
+<span class="s0">else</span><span class="s1">:</span>
+    <span class="s1">begin_date = unique_dates[</span><span class="s3">0</span><span class="s1">]</span>
+    <span class="s1">date_range = begin_date</span>
+
+<span class="s1">path = (</span><span class="s2">f'</span><span class="s0">{</span><span class="s1">ticker</span><span class="s0">}</span><span class="s2">-output-</span><span class="s0">{</span><span class="s1">date_range</span><span class="s0">}</span><span class="s2">.xlsx'</span><span class="s1">)</span>
+<span class="s1">print(</span><span class="s2">&quot;Path: &quot;</span><span class="s0">, </span><span class="s1">path)</span>
+
+<span class="s0">if </span><span class="s1">os.path.isfile(path):</span>
+    <span class="s1">rows = pd.read_excel(path</span><span class="s0">, </span><span class="s1">sheet_name=</span><span class="s2">&quot;bid&quot;</span><span class="s1">)</span>
+    <span class="s4">#final_df = pd.concat([final_df, rows], axis=1)</span>
+
+    <span class="s1">print(</span><span class="s2">&quot;rows df: &quot;</span><span class="s0">, </span><span class="s1">final_df)</span>
+    <span class="s1">num_rows = rows.shape[</span><span class="s3">0</span><span class="s1">] + </span><span class="s3">1</span>
+    <span class="s1">writer = pd.ExcelWriter(path</span><span class="s0">, </span><span class="s1">engine=</span><span class="s2">&quot;openpyxl&quot;</span><span class="s0">, </span><span class="s1">mode=</span><span class="s2">&quot;a&quot;</span><span class="s0">, </span><span class="s1">if_sheet_exists=</span><span class="s2">&quot;overlay&quot;</span><span class="s1">)</span>
+    <span class="s1">final_df.to_excel(writer</span><span class="s0">, </span><span class="s1">index=</span><span class="s0">False, </span><span class="s1">sheet_name=</span><span class="s2">'main'</span><span class="s0">, </span><span class="s1">startrow=num_rows</span><span class="s0">, </span><span class="s1">header=</span><span class="s0">False</span><span class="s1">)</span>
+    <span class="s1">final_ask.to_excel(writer</span><span class="s0">, </span><span class="s1">index=</span><span class="s0">False, </span><span class="s1">sheet_name=</span><span class="s2">'ask'</span><span class="s0">, </span><span class="s1">startrow=num_rows</span><span class="s0">, </span><span class="s1">header=</span><span class="s0">False</span><span class="s1">)</span>
+    <span class="s1">final_bid.to_excel(writer</span><span class="s0">, </span><span class="s1">index=</span><span class="s0">False, </span><span class="s1">sheet_name=</span><span class="s2">'bid'</span><span class="s0">, </span><span class="s1">startrow=num_rows</span><span class="s0">, </span><span class="s1">header=</span><span class="s0">False</span><span class="s1">)</span>
+
+    <span class="s1">writer.close()</span>
+<span class="s0">else</span><span class="s1">:</span>
+    <span class="s1">writer = pd.ExcelWriter(path</span><span class="s0">, </span><span class="s1">engine=</span><span class="s2">&quot;openpyxl&quot;</span><span class="s1">)</span>
+    <span class="s1">final_df.to_excel(writer</span><span class="s0">, </span><span class="s1">sheet_name=</span><span class="s2">'main'</span><span class="s0">, </span><span class="s1">index=</span><span class="s0">False</span><span class="s1">)</span>
+    <span class="s1">final_ask.to_excel(writer</span><span class="s0">, </span><span class="s1">index=</span><span class="s0">False, </span><span class="s1">sheet_name=</span><span class="s2">'ask'</span><span class="s1">)</span>
+    <span class="s1">final_bid.to_excel(writer</span><span class="s0">, </span><span class="s1">index=</span><span class="s0">False, </span><span class="s1">sheet_name=</span><span class="s2">'bid'</span><span class="s1">)</span>
+    <span class="s1">writer.close()</span></pre>
+</body>
+</html>
